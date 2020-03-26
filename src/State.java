@@ -1,6 +1,6 @@
 public class State {
     //This is an element of a huge 70x20x29x41 4d array.
-//    It holds information about how we got here - a 2d 5x3 array of shipments between mines and warehouses
+//    It holds information about how we got here and what we'll do next - a 2d 5x3 array of shipments between mines and warehouses
 //    Should look like that: Shipments[5][3]
 //      1 2 3
 //    1
@@ -25,7 +25,7 @@ public class State {
         totalCost += costIncrease;
     }
 
-    public void addShipment(int fromMine, int toWarehouse) {
-        shipmentsArray
+    public void addShipment(int fromMine, int toWarehouse, int shipmentAmount) {
+        shipmentsArray[fromMine][toWarehouse] += shipmentAmount;
     }
 }
