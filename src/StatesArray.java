@@ -14,7 +14,7 @@ public class StatesArray {
         }
     }
 
-    public State getState(int totalShipments, int ware1, int ware2, int ware3) {
-        return states[totalShipments][ware1][ware2][ware3];
+    public State getState(int totalShipments, int ware0, int ware1, int ware2) {
+        return states[totalShipments][ware0][ware1][ware2];
     }
 }
