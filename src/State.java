@@ -25,6 +25,7 @@ public class State {
 //    This constructor is used for possible solutions in all steps but the first one
 //    If the solution is obviously impossible in a current state, a BadState will be created instead
     public State(State sourceState) {
+        shipmentsArray = new int[5][3];
         for (int i = 0; i < 5; i++) {
             System.arraycopy(sourceState.shipmentsArray[i], 0, shipmentsArray[i], 0, 3);
         }
