@@ -1,31 +1,26 @@
 public class Main {
-
     public static void main(String[] args) {
         StatesArray statesArrayLastStep = new StatesArray();
+        State goodState = new State();
+        BadState badState = new BadState();
         Mine[] mines = new Mine[]{
                 new Mine(9.2, 14),
                 new Mine(12, 13),
                 new Mine(10.7, 14),
                 new Mine(13.8, 19),
                 new Mine(11.8, 29)};
-//        int currentWarehouse0 = 20;
-//        int currentWarehouse1 = 29;
-//        int currentWarehouse2 = 30; //so 0 and 1 are full, expecting 1 more to get total 70, warehouse2 has 11 more space
-//        For starters I'll do it manually, but later I'll just create Warehouses[3], Mines[5]
-//        And Mine will have either double transferCosts[3] or double transferTo1, transferTo2, transferTo3;
-
 //        getOptimal(StatesArray nextStep) -> outputs StatesArray for current step
 //        In the beginning shipmentsArray everywhere is  0 0 0, minCost is probably maxDouble.
         for (int warehouse0 = 0; warehouse0 <= 20; warehouse0++) {
             for (int warehouse1 = 0; warehouse1 <= 29; warehouse1++) {
                 for (int warehouse2 = 0; warehouse2 <= 41; warehouse2++) {
-//                    State state = statesArray.getState(warehouse0, warehouse1, warehouse2);
                     State state;
+                    int total = warehouse0 + warehouse1 + warehouse2;
 //                    check if possible at all
-                    if (warehouse0 + warehouse1 + warehouse2 > 68) {
+                    if (total == 69 || total == 70) {
                         state = new State();
 //                        if the sum is exactly 70 already, then the problem is solved and we don't need to do anything else
-                        if (warehouse0 + warehouse1 + warehouse2 == 69) {
+                        if (total == 69) {
 //                            Mines[4].miningCost + ShippingCosts.getShippingCost[4][0]; = 11.8 + 50.8 = 62.6
 //                            Mines[4].miningCost + ShippingCosts.getShippingCost[4][1]; = 11.8 + 28.3 = 40.1
 //                            Mines[4].miningCost + ShippingCosts.getShippingCost[4][2]; = 11.8 + 38.2 = 50
@@ -47,119 +42,98 @@ public class Main {
                 }
             }
         }
-//        System.out.println("case 20 29 11, expecting BadState");
-//        if (statesArray.getState(20, 29, 11).getClass() == BadState.class) System.out.println("This doesn't really work unfortunately");
-//        else statesArray.getState(20, 29, 11).outputShipmentsArray();
-//        System.out.println();
-//        System.out.println("case 19 29 21, expecting to skip 1 and add to 3 ");
-//        if (statesArray.getState(19, 29, 21).getClass() == BadState.class) System.out.println("This doesn't really work unfortunately");
-//        else statesArray.getState(19, 29, 21).outputShipmentsArray();
-//        System.out.println();
-//        System.out.println("case 19 28 22, expecting to skip 1 and add to 2");
-//        if (statesArray.getState(19, 28, 22).getClass() == BadState.class) System.out.println("This doesn't really work unfortunately");
-//        else statesArray.getState(19, 28, 22).outputShipmentsArray();
-//        System.out.println();
-//        System.out.println("case 20 29 20, expecting to add to 3");
-//        if (statesArray.getState(20, 29, 20).getClass() == BadState.class) System.out.println("This doesn't really work unfortunately");
-//        else statesArray.getState(20, 29, 20).outputShipmentsArray();
-//        System.out.println();
-//        System.out.println("case 20 29 21, expecting not to do anything");
-//        if (statesArray.getState(20, 29, 21).getClass() == BadState.class) System.out.println("This doesn't really work unfortunately");
-//        else statesArray.getState(20, 29, 21).outputShipmentsArray();
-//        System.out.println();
-        StatesArray statesArrayPrevious = new StatesArray();
-        for (int warehouse0 = 0; warehouse0 <= 20; warehouse0++) {
-            for (int warehouse1 = 0; warehouse1 <= 29; warehouse1++) {
-                for (int warehouse2 = 0; warehouse2 <= 41; warehouse2++) {
-//                    State state = statesArray.getState(warehouse0, warehouse1, warehouse2);
-                    State previousState;
-                    int total = warehouse0 + warehouse1 + warehouse2;
-//                    if it's done already then we don't do anything
-                    if (total == 70) {
-                        previousState = new State(statesArrayLastStep.getState(warehouse0, warehouse1, warehouse2));
-                    }
-//                    check if possible at all
-                    else if (total >= 68 && total <= 69 ) {
-//                        if the sum is exactly 70 already, then the problem is solved and we don't need to do anything else
-//                        calculate for ware 0-2
-//                        then, if it's more than 68 (and less then 70?),
-//                        check if not doing anything is cheaper
-//                        and then create a state accordingly
-//                        Maybe I should have Mine.SendToWarehouse(Warehouse warehouse) so SendToWarehouse(Warehouses[2])
-//                        Would be how the decision is made
-//                        Here we have 4 options. Not take at all or send to one of 0-2 warehouses.
-//                        We check what solution is cheapest and we save it to this StatesArray element
 
-//                        calculate the costs of these 4 decisions here
-//                        These are costs of different options.
+        int currentMine = 4;
+        StatesArray[] mine4Arrays = new StatesArray[mines[currentMine].getMiningLimit()];
+        mine4Arrays[mine4Arrays.length - 1] = statesArrayLastStep; //The very last step is manually added to the array
+        for (int currentCoalTonne = mines[currentMine].getMiningLimit() - 2; currentCoalTonne >= 0; currentCoalTonne--) { //"-2" because we start with the second to last tonne
+            StatesArray currentStatesArray = new StatesArray();
+            for (int warehouse0 = 0; warehouse0 <= 20; warehouse0++) {
+                for (int warehouse1 = 0; warehouse1 <= 29; warehouse1++) {
+                    for (int warehouse2 = 0; warehouse2 <= 41; warehouse2++) {
+                        State currentState;
+                        int tonnesExpecting = 70 - (warehouse0 + warehouse1 + warehouse2);
+                        int stepsLeft = mines[currentMine].getMiningLimit() - currentCoalTonne; //Steps left including current one
+                        StatesArray nextStepStates = mine4Arrays[currentCoalTonne + 1];
+//                    if we've got enough coal already then we don't do anything
+                        if (tonnesExpecting == 0) {
+                            currentState = new State(nextStepStates.getState(warehouse0, warehouse1, warehouse2));
+                        }
+//                    check if possible at all
+//                        mines[4].getMiningLimit() - i = steps taken
+                        else if (stepsLeft >= tonnesExpecting && tonnesExpecting >= 1) {
+//                        Now we have 4 options. We can either ship the tonne of coal to one of 0-2 warehouses
+//                        or not take it at all.
+//                        We check what solution is the cheapest and then we save it to this StatesArray element
+
+//                        Here we calculate the costs of those 4 options.
 //                        By default they are max double because if the value doesn't change this would signify that
 //                        This route is implausible
-                        double shippingToWare0Cost = Double.MAX_VALUE;
-                        double shippingToWare1Cost = Double.MAX_VALUE;
-                        double shippingToWare2Cost = Double.MAX_VALUE;
-                        if (warehouse0 < 20) {
-                            shippingToWare0Cost = statesArrayLastStep.getState(warehouse0 + 1, warehouse1, warehouse2).getTotalCost() + 62.6;
-                        }
-                        if (warehouse1 < 29) {
-                            shippingToWare1Cost = statesArrayLastStep.getState(warehouse0, warehouse1 + 1, warehouse2).getTotalCost() + 40.1;
-                        }
-                        if (warehouse2 < 41) {
-                            shippingToWare2Cost = statesArrayLastStep.getState(warehouse0, warehouse1, warehouse2 + 1).getTotalCost() + 50;
-                        }
-                        double notShippingCost = Double.MAX_VALUE;
-                        if (warehouse0 + warehouse1 + warehouse2 > 68) { //so if it's exactly 69
-                            notShippingCost = statesArrayLastStep.getState(warehouse0, warehouse1, warehouse2).getTotalCost();
-                        }
+                            double totalShippingToWare0Cost = Double.MAX_VALUE;
+                            double totalShippingToWare1Cost = Double.MAX_VALUE;
+                            double totalShippingToWare2Cost = Double.MAX_VALUE;
+                            double notShippingCost = Double.MAX_VALUE;
+
+                            double shipToWare0Cost = mines[currentMine].getMiningCost() + ShippingCosts.getShippingCost(currentMine, 0);
+                            double shipToWare1Cost = mines[currentMine].getMiningCost() + ShippingCosts.getShippingCost(currentMine, 1);
+                            double shipToWare2Cost = mines[currentMine].getMiningCost() + ShippingCosts.getShippingCost(currentMine, 2);
+
+//                        I need to replace the constants with Mines[currentMine].miningCost + ShippingCosts.getShippingCost[currentMine][0/1/2];
+                            if (warehouse0 < 20) {
+                                State nextState = nextStepStates.getState(warehouse0 + 1, warehouse1, warehouse2);
+                                if (nextState.isPossible())
+                                    //min cost from next step + cost from current step
+                                    totalShippingToWare0Cost = nextState.getTotalCost() + shipToWare0Cost;
+                            }
+                            if (warehouse1 < 29) {
+                                State nextState = nextStepStates.getState(warehouse0, warehouse1 + 1, warehouse2);
+                                if (nextState.isPossible())
+                                    totalShippingToWare1Cost = nextState.getTotalCost() + shipToWare1Cost;
+                            }
+                            if (warehouse2 < 41) {
+                                State nextState = nextStepStates.getState(warehouse0, warehouse1, warehouse2 + 1);
+                                if (nextState.isPossible())
+                                    totalShippingToWare2Cost = nextState.getTotalCost() + shipToWare2Cost;
+                            }
+                            if (stepsLeft > tonnesExpecting) {
+                                notShippingCost = nextStepStates.getState(warehouse0, warehouse1, warehouse2).getTotalCost();
+                            }
 //                        Then determine which shipping option is the cheapest here and realise it
-//                        <= means that we'll ship as early as we can and we'll prioritise the 1st warehouse if it doesn't matter
-                        if (shippingToWare0Cost <= Math.min(shippingToWare1Cost, Math.min(shippingToWare2Cost, notShippingCost))) {
-                            previousState = new State(statesArrayLastStep.getState(warehouse0 + 1, warehouse1, warehouse2));
-                            previousState.addShipment(4, 0);
-                            previousState.increaseCost(shippingToWare0Cost);
+//                        "<=" means that we'll ship as early as we can and we'll prioritise the 1st warehouse if it doesn't matter
+                            if (totalShippingToWare0Cost <= Math.min(totalShippingToWare1Cost, Math.min(totalShippingToWare2Cost, notShippingCost))) {
+                                currentState = new State(nextStepStates.getState(warehouse0 + 1, warehouse1, warehouse2));
+                                currentState.addShipment(currentMine, 0);
+                                currentState.increaseCost(shipToWare0Cost);
+                            }
+                            else if (totalShippingToWare1Cost <= Math.min(totalShippingToWare2Cost,notShippingCost)) {
+                                currentState = new State(nextStepStates.getState(warehouse0, warehouse1 + 1, warehouse2));
+                                currentState.addShipment(currentMine, 1);
+                                currentState.increaseCost(shipToWare1Cost);
+                            }
+                            else if (totalShippingToWare2Cost <= notShippingCost) {
+                                currentState = new State(nextStepStates.getState(warehouse0, warehouse1, warehouse2 + 1));
+                                currentState.addShipment(currentMine, 2);
+                                currentState.increaseCost(shipToWare2Cost);
+                            }
+                            else {
+                                currentState = new State(nextStepStates.getState(warehouse0, warehouse1, warehouse2));
+                            }
                         }
-                        else if (shippingToWare1Cost <= Math.min(shippingToWare2Cost,notShippingCost)) {
-                            previousState = new State(statesArrayLastStep.getState(warehouse0, warehouse1 + 1, warehouse2));
-                            previousState.addShipment(4, 1);
-                            previousState.increaseCost(shippingToWare1Cost);
-                        }
-                        else if (shippingToWare2Cost <= notShippingCost) {
-                            previousState = new State(statesArrayLastStep.getState(warehouse0, warehouse1, warehouse2 + 1));
-                            previousState.addShipment(4, 2);
-                            previousState.increaseCost(shippingToWare2Cost);
-                        }
-                        else {
-                            previousState = new State(statesArrayLastStep.getState(warehouse0, warehouse1, warehouse2));
-                        }
-                    }
-                    else previousState = new BadState(); //not enough to get 70, so that's a fail-state,
+                        else currentState = new BadState(); //not enough to get 70, so that's a fail-state,
 //                    or went over 70 and that's a superfluous state
-                    statesArrayPrevious.setState(warehouse0, warehouse1, warehouse2, previousState);
+                        currentStatesArray.setState(warehouse0, warehouse1, warehouse2, currentState);
+                    }
                 }
             }
+            mine4Arrays[currentCoalTonne] = currentStatesArray;
         }
+        System.out.println("Path from the 1st tonne when warehouses are empty");
+        mine4Arrays[0].getState(0, 0, 0).outputResult();
         System.out.println();
-        System.out.println("case 20 29 11, expecting BadState");
-        if (statesArrayPrevious.getState(20, 29, 11).getClass() == BadState.class) System.out.println("This doesn't really work unfortunately");
-        else statesArrayPrevious.getState(20, 29, 11).outputShipmentsArray();
+        System.out.println("Path from the 1st tonne when warehouses have 29 space left - 0 0 41");
+        mine4Arrays[0].getState(0, 0, 41).outputResult();
         System.out.println();
-        System.out.println("case 19 29 21, expecting to skip 1 and add to 3 ");
-        if (statesArrayPrevious.getState(19, 29, 21).getClass() == BadState.class) System.out.println("This doesn't really work unfortunately");
-        else statesArrayPrevious.getState(19, 29, 21).outputShipmentsArray();
-        System.out.println();
-        System.out.println("case 19 28 22, expecting to skip 1 and add to 2");
-        if (statesArrayPrevious.getState(19, 28, 22).getClass() == BadState.class) System.out.println("This doesn't really work unfortunately");
-        else statesArrayPrevious.getState(19, 28, 22).outputShipmentsArray();
-        System.out.println();
-        System.out.println("case 20 29 20, expecting to add to 3");
-        if (statesArrayPrevious.getState(20, 29, 20).getClass() == BadState.class) System.out.println("This doesn't really work unfortunately");
-        else statesArrayPrevious.getState(20, 29, 20).outputShipmentsArray();
-        System.out.println();
-        System.out.println("case 20 29 21, expecting not to do anything");
-        if (statesArrayPrevious.getState(20, 29, 21).getClass() == BadState.class) System.out.println("This doesn't really work unfortunately");
-        else statesArrayPrevious.getState(20, 29, 21).outputShipmentsArray();
-        System.out.println();
-        System.out.println("case 19 28 21, expecting to add to 2 and to 3 ");
-        if (statesArrayPrevious.getState(19, 28, 21).getClass() == BadState.class) System.out.println("This doesn't really work unfortunately");
-        else statesArrayPrevious.getState(19, 28, 21).outputShipmentsArray();
+        System.out.println("Path from 1st tonne when warehouses have 29 space left, but the 2nd warehouse hasn't enough space - 4 12 25");
+        mine4Arrays[0].getState(4, 12, 25).outputResult();
     }
 }

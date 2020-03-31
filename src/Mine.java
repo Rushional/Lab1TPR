@@ -7,4 +7,12 @@ public class Mine {
         this.miningCost = miningCost;
         this.miningLimit = miningLimit;
     }
+
+    public int getMiningLimit() {
+        return miningLimit;
+    }
+
+    public double getMiningCost() {
+        return miningCost;
+    }
 }

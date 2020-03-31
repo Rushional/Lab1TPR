@@ -40,12 +40,20 @@ public class State {
         shipmentsArray[fromMine][toWarehouse] += 1;
     }
 
-    public void outputShipmentsArray() {
+    private void outputShipmentsArray() {
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 3; j++) {
                 System.out.print(shipmentsArray[i][j] + " ");
             }
             System.out.println();
+        }
+    }
+
+    public void outputResult() {
+        if (getClass() == BadState.class) System.out.println("This state won't get you anywhere");
+        else {
+            outputShipmentsArray();
+            System.out.println("Total cost is: " + getTotalCost());
         }
     }
 
@@ -55,5 +63,9 @@ public class State {
 
     public double getTotalCost() {
         return totalCost;
+    }
+
+    public boolean isPossible() {
+        return !(this.getClass() == BadState.class);
     }
 }
