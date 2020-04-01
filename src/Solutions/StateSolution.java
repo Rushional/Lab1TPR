@@ -1,18 +1,21 @@
-public class State {
-    //This is an element of a huge 70x20x29x41 4d array.
-//    It holds information about how we got here and what we'll do next - a 2d 5x3 array of shipments between mines and warehouses
+package Solutions;
+
+public class StateSolution {
+    //This is an element of a huge 20x29x41 3d array.
+//    It holds information about what's the optimal action in this state and what happens after it
+//    It's a 2d 5x3 array of shipments between mines and warehouses
 //    Should look like that: Shipments[5][3]
-//      1 2 3
+//      0 1 2
+//    0
 //    1
 //    2
 //    3
 //    4
-//    5
     private int[][] shipmentsArray;
     private double totalCost;
 
 //    This constructor is only used in the very first step, when creating states for the last tonne of coal
-    public State() {
+    public StateSolution() {
         totalCost = 0;
         shipmentsArray = new int[5][3];
         for (int i = 0; i < 5; i++) {
@@ -24,12 +27,12 @@ public class State {
 
 //    This constructor is used for possible solutions in all steps but the first one
 //    If the solution is obviously impossible in a current state, a BadState will be created instead
-    public State(State sourceState) {
+    public StateSolution(StateSolution sourceStateSolution) {
         shipmentsArray = new int[5][3];
         for (int i = 0; i < 5; i++) {
-            System.arraycopy(sourceState.shipmentsArray[i], 0, shipmentsArray[i], 0, 3);
+            System.arraycopy(sourceStateSolution.shipmentsArray[i], 0, shipmentsArray[i], 0, 3);
         }
-        totalCost = sourceState.totalCost;
+        totalCost = sourceStateSolution.totalCost;
     }
 
     public void increaseCost(double costIncrease) {
@@ -50,10 +53,14 @@ public class State {
     }
 
     public void outputResult() {
-        if (getClass() == BadState.class) System.out.println("This state won't get you anywhere");
+        if (getClass() == BadStateSolution.class) System.out.println("This state won't get you anywhere");
         else {
             outputShipmentsArray();
-            System.out.println("Total cost is: " + getTotalCost());
+            double roundedTotalCost = getTotalCost();
+            roundedTotalCost *= 10;
+            roundedTotalCost = Math.round(roundedTotalCost);
+            roundedTotalCost = roundedTotalCost/10;
+            System.out.println("Total cost is: " + roundedTotalCost);
         }
     }
 
@@ -66,6 +73,6 @@ public class State {
     }
 
     public boolean isPossible() {
-        return !(this.getClass() == BadState.class);
+        return !(this.getClass() == BadStateSolution.class);
     }
 }

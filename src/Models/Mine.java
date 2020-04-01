@@ -1,3 +1,5 @@
+package Models;
+
 public class Mine {
     private double miningCost;
     private int miningLimit;
